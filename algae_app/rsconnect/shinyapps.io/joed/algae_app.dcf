@@ -1,0 +1,13 @@
+name: algae_app
+title: algae_app
+username:
+account: joed
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5060337
+bundleId: 5222086
+url: https://joed.shinyapps.io/algae_app/
+when: 1636238357.46683
+lastSyncTime: 1636238357.46685
+asMultiple: FALSE
+asStatic: FALSE
