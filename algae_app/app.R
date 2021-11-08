@@ -7,21 +7,25 @@ data <- read.csv("./data/total_detections_by_phylum.csv")
 data$date <- as.factor(data$date)
 
 ui <- fluidPage(
-  checkboxGroupInput(inputId = "phylum",
+  tabsetPanel(
+    tabPanel("Bar Chart",
+      checkboxGroupInput(inputId = "phylum",
               label = "Select Phyla",
               choices = c(unique(data$phylum)),
-              selected = c("Annelida","Chordata"),
+              selected = c("Bangiophyceae", "Compsopogonophyceae", "Phaeophyceae",
+                           "Rhodophyta", "Florideophyceae"),
               inline = T,
               width = "75%"),
   
-  checkboxGroupInput(inputId = "site",
+      checkboxGroupInput(inputId = "site",
                      label = "Select Site",
                      choices = c(unique(data$site)),
                      selected = c("FH"),
                      inline = T),
   
+      plotOutput("bar")),
   
-  plotOutput("bar")
+    tabPanel("PCA Plot"))
 )
 
 server <- function(input, output) {
