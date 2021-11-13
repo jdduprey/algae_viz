@@ -10,11 +10,9 @@ library("dplyr")
 library("ggplot2")
 library("vegan")
 
-by.sample.species <- read.csv('../data/by.sample.species.csv') # reads merged by tech and bio
-benthic.presence.absence <- read.csv('../data/benthic.presence.absence.csv')
-hash.annotated <- read.csv('../data/hash.annotated.csv') # Mocho's hashes with taxa info
-events <- read.csv('../data/events.joe.format.csv') # event table
-more_hashes <- read.csv("../data/all.taxonomy.20190130.csv")
+by.sample.species <- read.csv('./data/by.sample.species.csv') # reads merged by tech and bio
+hash.annotated <- read.csv('./data/hash.annotated.csv') # Mocho's hashes with taxa info
+events <- read.csv('./data/events.joe.format.csv') # event table
 
 # split date and site in event table
 # sd.events <- events %>% 
@@ -117,26 +115,15 @@ filter_get_PA_data <- function(all_tax_df,
   return(taxa_data_list)
   }
 
-x <- algae_data$sum
-y <- algae_data$PA_df
-
-# test filter_get_PA_data() function 
 #===================================================
-algae_data <- filter_get_PA_data(species.by.sample.alltax, 
-                                 algae_list, 
-                                 plk_only,
-                                 hood_canal_only,
-                                 8)
-#===================================================
-
 # takes as input wide presence absence dataframe 
-plot_NMDS_eil <- function(wide_PA_df) {
+plot_NMDS_eil <- function(wide_PA_df, meta_df) {
   
   jaccard_nmds <- metaMDS(wide_PA_df, distance = "jaccard")
   jaccard_MDS1 <- jaccard_nmds$points[,1] #store nmds values
   jaccard_MDS2 <- jaccard_nmds$points[,2] #store nmds values 
   
-  jaccard_to_plot <- cbind(algae_data$metadata, jaccard_MDS1, jaccard_MDS2)
+  jaccard_to_plot <- cbind(meta_df, jaccard_MDS1, jaccard_MDS2)
   print(jaccard_to_plot)
   
   NMDS_plot <- ggplot(jaccard_to_plot, aes(x=jaccard_MDS1, y=jaccard_MDS2)) +
@@ -149,10 +136,4 @@ plot_NMDS_eil <- function(wide_PA_df) {
   
   }
 
-# use the NMDS function 
-#===================================================
-plot_NMDS_eil(algae_data$wide_PA)
-#===================================================
-
-ggsave("../figures/noconverg_HC_BEN.png")
 

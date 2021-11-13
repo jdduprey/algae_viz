@@ -1,6 +1,12 @@
+#===================================================
+# Joe Duprey
+# Practicing Interactive Data Viz and Exploring Algae Data
+# Last edited 11/13/2021
+#===================================================
 library(shiny)
 library(ggplot2)
 library(tidyverse)
+source("viz_metaMDS.R")
 
 #load data
 bar_data <- read.csv("./data/total_detections_by_phylum.csv")
@@ -36,8 +42,8 @@ ui <- fluidPage(
     tabPanel("NMDS Plot",
       checkboxGroupInput(inputId = "NMDS_phyla",
               label = "Select Phyla Filter for NMDS",
-              choices = phyla_check_list,
-              selected = phyla_check_list, 
+              choiceNames = list(icon("bug"), icon("seedling")),
+              choiceValues = list("Arthropoda","Bacillariophyta"),
               inline = T,
               width = "75%"), #,
       
@@ -81,6 +87,24 @@ server <- function(input, output) {
   
   output$NMDS_plot <- renderPlot({
     
+    filtered_pa_df <- filter_get_PA_data(species.by.sample.alltax, 
+                                                             input$NMDS_phyla, 
+                                                             all_life_listry,
+                                                             SJI_only,
+                                                             0)
+    
+    jaccard_nmds <- metaMDS(filtered_pa_df$wide_PA, distance = "jaccard")
+    jaccard_MDS1 <- jaccard_nmds$points[,1] #store nmds values
+    jaccard_MDS2 <- jaccard_nmds$points[,2] #store nmds values 
+    
+    jaccard_to_plot <- cbind(filtered_pa_df$metadata, jaccard_MDS1, jaccard_MDS2)
+    print(jaccard_to_plot)
+    
+    ggplot(jaccard_to_plot, aes(x=jaccard_MDS1, y=jaccard_MDS2)) +
+      geom_point(size=3, aes(color=factor(site))) +  # shape=factor())
+      theme_bw() +
+      labs(x="PC1",y="PC2", color="Site") +
+      ggtitle("Hood Canal Benthic Algae - COI - Jaccard") # + geom_text(aes(label=sample))
     
   })
   
