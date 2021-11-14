@@ -85,7 +85,7 @@ filter_get_PA_data <- function(all_tax_df,
   print(paste("Initial nrows detection df:", nrow(n_detections_taxa_df)))
   print(paste("Initial taxa", nrow(sum_detections_taxa)))
   
-  #TODO I think I fixed the filter by n_detections -joe 10/11/2021
+  #TODO this needs to be up at line 60, so maybe the data just needs to be loaded in when app is booted 
   retained_taxa <- sum_detections_taxa %>%
     filter(sum_detections > detection_cutoff)
   

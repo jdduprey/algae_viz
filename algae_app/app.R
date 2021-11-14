@@ -12,13 +12,6 @@ source("viz_metaMDS.R")
 bar_data <- read.csv("./data/total_detections_by_phylum.csv")
 bar_data$date <- as.factor(bar_data$date)
 
-#define NMDS checkbox lists
-phyla_check_list <- list("Algae"= c("Florideophyceae", "Phaeophyceae", "Bacillariophyta", 
-                              "Bangiophyceae", "Compsopogonophyceae", "Rhodophyta"), 
-                  "Invertebrates"= c("Cnidaria", "Arthropoda", "Annelida", "Mollusca",
-                                     "Bryozoa", "Echinodermata", "Nemertea", "Entoprocta",
-                                     "Brachiopoda", "Nematoda"))
-
 
 ui <- fluidPage(
   tabsetPanel(
@@ -40,35 +33,34 @@ ui <- fluidPage(
       plotOutput("bar")), 
   
     tabPanel("NMDS Plot",
-      checkboxGroupInput(inputId = "NMDS_phyla",
-              label = "Select Phyla Filter for NMDS",
-              choiceNames = list(icon("bug"), icon("seedling")),
-              choiceValues = list("Arthropoda","Bacillariophyta"),
-              inline = T,
-              width = "75%"), #,
+      radioButtons(inputId = "NMDS_phyla",
+                  label = "Select Phyla Filter for NMDS",
+                  choices = c("Algae", "Invertebrates", "All Taxa"),
+                  selected = c("All Taxa"),
+                  inline = F,
+                  width = "75%"), 
+
+      radioButtons(inputId = "NMDS_life_history",
+                  label = "Select Life History Filter for NMDS",
+                  choices = c("Planktonic", "Benthic", "All Life History"),
+                  selected = c("All Life History"),
+                  inline = F,
+                  width = "75%"),
+
+      radioButtons(inputId = "NMDS_location",
+                  label = "Select Location Filter for NMDS",
+                  choices = c("Hood Canal", "San Juan Island", "Salish Sea"),
+                  selected = c("Salish Sea"), 
+                  inline = F,
+                  width = "75%"),
+     
+      sliderInput(inputId = "NMDS_n_det",
+                  label = paste("Include species with greater than X out of 81 detections in NMDS calculation."),
+                  min = 0, max = 60,
+                  value = 0,
+                  ),
       
-      plotOutput("NMDS_plot")
-      # 
-      # checkboxGroupInput(inputID = "NMDS_life_history",
-      #         label = "Select Life History Filter for NMDS",
-      #         choices = , #TODO
-      #         selection = , #TODO
-      #         inline = T, #TODO
-      #         width = "75%"),
-      # 
-      # checkboxGroupInput(inputID = "NMDS_location",
-      #         label = "Select Location for NMDS",
-      #         choices = , #TODO
-      #         selection = , #TODO
-      #         inline = T, #TODO
-      #         width = "75%"),
-      # 
-      # checkboxGroupInput(inputID = "NMDS_n_detection",
-      #         label = "Select Minimum Number of Detections to Appear in NMDS",
-      #         choices = , #TODO
-      #         selection = , #TODO
-      #         inline = T, #TODO
-      #         width = "75%")
+      plotOutput("NMDS_plot", width = "1000px")
       ))
 )
 
@@ -87,11 +79,47 @@ server <- function(input, output) {
   
   output$NMDS_plot <- renderPlot({
     
+    phyla_choice_list <- c()
+    # checkbox choice logic PHYLA (probably a better way)
+    if(input$NMDS_phyla == "Algae"){
+      phyla_choice_list <- algae_list
+    }
+    if(input$NMDS_phyla == "Invertebrates"){
+      phyla_choice_list <- invert_list
+    }
+    if(input$NMDS_phyla == "All Taxa"){
+      phyla_choice_list <- c(invert_list, algae_list)
+    }
+    
+    lh_choice_list <- c()
+    # checkbox choice logic LIFE HISTORY
+    if(input$NMDS_life_history == "Planktonic"){
+      lh_choice_list <- plk_only #TODO bug bug bug 
+    }
+    if(input$NMDS_life_history == "Benthic"){
+      lh_choice_list <- ben_only
+    }
+    if(input$NMDS_life_history == "All Life History"){
+      lh_choice_list <- all_life_listry
+    }
+    
+    loc_choice_list <- c()
+    # checkbox choice logic LOCATION
+    if(input$NMDS_location == "Hood Canal"){
+      loc_choice_list <- hood_canal_only
+    }
+    if(input$NMDS_location == "San Juan Island"){
+      loc_choice_list <- SJI_only
+    }
+    if(input$NMDS_location == "Salish Sea"){
+      loc_choice_list <- all_locations
+    }
+  
     filtered_pa_df <- filter_get_PA_data(species.by.sample.alltax, 
-                                                             input$NMDS_phyla, 
-                                                             all_life_listry,
-                                                             SJI_only,
-                                                             0)
+                                                             phyla_choice_list, 
+                                                             lh_choice_list,
+                                                             loc_choice_list,
+                                                             input$NMDS_n_det)
     
     jaccard_nmds <- metaMDS(filtered_pa_df$wide_PA, distance = "jaccard")
     jaccard_MDS1 <- jaccard_nmds$points[,1] #store nmds values
@@ -103,8 +131,9 @@ server <- function(input, output) {
     ggplot(jaccard_to_plot, aes(x=jaccard_MDS1, y=jaccard_MDS2)) +
       geom_point(size=3, aes(color=factor(site))) +  # shape=factor())
       theme_bw() +
-      labs(x="PC1",y="PC2", color="Site") +
-      ggtitle("Hood Canal Benthic Algae - COI - Jaccard") # + geom_text(aes(label=sample))
+      labs(x="NMDS1",y="NMDS2", color="Site") +
+      ggtitle(paste("Community Structure of -", input$NMDS_life_history, "-", 
+                    input$NMDS_phyla, "- throughout", input$NMDS_location)) # + geom_text(aes(label=sample))
     
   })
   
