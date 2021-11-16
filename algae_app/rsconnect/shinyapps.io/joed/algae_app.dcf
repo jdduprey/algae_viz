@@ -5,9 +5,9 @@ account: joed
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5060337
-bundleId: 5249237
+bundleId: 5256560
 url: https://joed.shinyapps.io/algae_app/
-when: 1636853553.3612
-lastSyncTime: 1636853553.36122
+when: 1637035758.88183
+lastSyncTime: 1637035758.88187
 asMultiple: FALSE
 asStatic: FALSE

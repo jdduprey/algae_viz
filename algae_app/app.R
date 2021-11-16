@@ -38,6 +38,8 @@ ui <- fluidPage(
     
     # NMDS tab
     tabPanel("NMDS Plot",
+    sidebarLayout(
+      sidebarPanel(
       radioButtons(inputId = "NMDS_phyla",
                   label = "Select Phyla Filter for NMDS",
                   choices = c("Algae", "Invertebrates", "All Taxa"),
@@ -63,10 +65,11 @@ ui <- fluidPage(
                   label = paste("Include species with greater than X out of 81 detections in NMDS calculation."),
                   min = 0, max = 60,
                   value = 0,
-                  ),
-      
-      plotOutput("NMDS_plot", width = "1000px")
-      ))
+                  )),
+    
+      mainPanel(
+      plotOutput("NMDS_plot", width = "80%"))
+      )))
 )
 
 # SERVER
