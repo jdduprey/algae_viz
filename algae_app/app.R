@@ -137,6 +137,7 @@ server <- function(input, output) {
                                                              loc_choice_list,
                                                              input$NMDS_n_det)
     
+    # get NMDS jaccard values 
     jaccard_nmds <- metaMDS(filtered_pa_df$wide_PA, distance = "jaccard")
     jaccard_MDS1 <- jaccard_nmds$points[,1] #store nmds values
     jaccard_MDS2 <- jaccard_nmds$points[,2] #store nmds values 
@@ -149,7 +150,7 @@ server <- function(input, output) {
       theme_bw() +
       labs(x="NMDS1",y="NMDS2", color="Site") +
       ggtitle(paste("Community Structure of -", input$NMDS_life_history, "-", 
-                    input$NMDS_phyla, "- throughout", input$NMDS_location)) # + geom_text(aes(label=sample))
+                    input$NMDS_phyla, "- throughout", input$NMDS_location)) # + geom_text(aes(label=sample)) this could be an input toggle
     
   })
   
