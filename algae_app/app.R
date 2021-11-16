@@ -6,15 +6,19 @@
 library(shiny)
 library(ggplot2)
 library(tidyverse)
+library(shinythemes)
 source("viz_metaMDS.R")
 
 #load data
 bar_data <- read.csv("./data/total_detections_by_phylum.csv")
-bar_data$date <- as.factor(bar_data$date)
+bar_data$date <- as.factor(bar_data$date) #date format bugfix 
 
-
+# UI
+#===================================================
 ui <- fluidPage(
+  theme = shinytheme("darkly"),
   tabsetPanel(
+    # stacked barchart tab 
     tabPanel("Bar Chart",
       checkboxGroupInput(inputId = "phylum",
               label = "Select Phyla",
@@ -31,7 +35,8 @@ ui <- fluidPage(
                      inline = T),
   
       plotOutput("bar")), 
-  
+    
+    # NMDS tab
     tabPanel("NMDS Plot",
       radioButtons(inputId = "NMDS_phyla",
                   label = "Select Phyla Filter for NMDS",
@@ -64,6 +69,8 @@ ui <- fluidPage(
       ))
 )
 
+# SERVER
+#===================================================
 server <- function(input, output) {
   output$bar <- renderPlot({
     
@@ -114,7 +121,13 @@ server <- function(input, output) {
     if(input$NMDS_location == "Salish Sea"){
       loc_choice_list <- all_locations
     }
-  
+    
+    # filter_get_PA_data 
+    # INPUTS
+    # string list of phyla - expand to other taxanomic divisions later
+    # string list of life history - benthic, planktonic etc
+    # loc - san juan, hood canal or all sampling sites throughout salish sea
+    # integer of minimum detections required for species to be included in NMDS alg.
     filtered_pa_df <- filter_get_PA_data(species.by.sample.alltax, 
                                                              phyla_choice_list, 
                                                              lh_choice_list,
